@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, UserEditForm, AuthenticateForm
 from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
@@ -216,7 +216,44 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    user = g.user
+
+    edit_form = UserEditForm(obj=user)
+    authenticate_form = AuthenticateForm()
+    
+    if authenticate_form.is_submitted():
+        if authenticate_form.validate_on_submit():
+            entered_password = authenticate_form.password.data
+            username = user.username
+            if User.authenticate(username, entered_password):
+                return render_template('/users/edit.html',
+                                       form=edit_form,
+                                       authenticated=True)
+            else:
+                flash("Incorrect password", "danger")
+                return render_template('/users/edit.html',
+                                       form=authenticate_form,
+                                       authenticated=False)
+    else:
+        return render_template('/users/edit.html',
+                               form=authenticate_form,
+                               authenticated=False)
+    if edit_form.is_submitted():
+        if edit_form.validate_on_submit():
+            user.username = edit_form.username.data
+            user.email = edit_form.email.data
+            user.image_url = edit_form.image_url.data
+            user.header_image_url = edit_form.header_image_url.data
+            user.bio = edit_form.bio.data
+            db.session.commit()
+            return redirect(f'/users/{user.id}')
+        else:
+            return render_template('/users/edit.html',
+                                   form=edit_form,
+                                   authenticated=True)
 
 
 @app.route('/users/delete', methods=["POST"])
