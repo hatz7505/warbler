@@ -112,12 +112,9 @@ def login():
 @app.route('/logout')
 def logout():
     """Handle logout of user."""
-    if CURR_USER_KEY in session:
-        user_id = session[CURR_USER_KEY]
-        user = User.query.get(user_id)
-        username = user.username
-        do_logout()
-        flash(f'User {username} logged out', category="danger")
+    username = g.user.username
+    do_logout()
+    flash(f'User {username} logged out', category="danger")
     return redirect('/login')
 
 
@@ -333,25 +330,25 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
-    if g.user:
-        message_ids = []
-        for following in g.user.following:
-            for msg in following.messages:
-                message_ids.append(msg.id)
-        for msg in g.user.messages:
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message_ids = []
+    for following in g.user.following:
+        for msg in following.messages:
             message_ids.append(msg.id)
+    for msg in g.user.messages:
+        message_ids.append(msg.id)
 
-        messages = (Message
-                    .query
-                    .filter(Message.id.in_(message_ids))
-                    .order_by(Message.timestamp.desc())
-                    .limit(100)
-                    .all())
+    messages = (Message
+                .query
+                .filter(Message.id.in_(message_ids))
+                .order_by(Message.timestamp.desc())
+                .limit(100)
+                .all())
 
-        return render_template('home.html', messages=messages)
-
-    else:
-        return render_template('home-anon.html')
+    return render_template('home.html', messages=messages)
 
 
 ##############################################################################
