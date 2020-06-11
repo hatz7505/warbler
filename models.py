@@ -47,6 +47,7 @@ class Likes(db.Model):
         db.ForeignKey('messages.id', ondelete='cascade')
     )
 
+    message = db.relationship('Message')
 
 
 class User(db.Model):

@@ -208,8 +208,21 @@ def stop_following(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/profile', methods=["GET", "POST"])
-def profile():
+@app.route('/users/profile', methods=["GET"])
+def profile_get():
+    """Update profile for current user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    authenticate_form = AuthenticateForm()
+    return render_template(
+        "/users/edit.html", form=authenticate_form, authenticated=False)
+
+
+@app.route('/users/profile', methods=["POST"])
+def profile_post():
     """Update profile for current user."""
 
     if not g.user:
@@ -219,9 +232,9 @@ def profile():
 
     edit_form = UserEditForm(obj=user)
     authenticate_form = AuthenticateForm()
-    
+
     if authenticate_form.is_submitted():
-        if authenticate_form.validate_on_submit():
+        if authenticate_form.validate():
             entered_password = authenticate_form.password.data
             username = user.username
             if User.authenticate(username, entered_password):
@@ -233,17 +246,23 @@ def profile():
                 return render_template('/users/edit.html',
                                        form=authenticate_form,
                                        authenticated=False)
-    else:
-        return render_template('/users/edit.html',
-                               form=authenticate_form,
-                               authenticated=False)
+
     if edit_form.is_submitted():
-        if edit_form.validate_on_submit():
+        if edit_form.validate():
             user.username = edit_form.username.data
             user.email = edit_form.email.data
             user.image_url = edit_form.image_url.data
             user.header_image_url = edit_form.header_image_url.data
             user.bio = edit_form.bio.data
+            # form_data = { 
+            #     "username": edit_form.username.data,
+            #     "email": edit_form.email.data,
+            #     "image_url": edit_form.image_url.data, 
+            #     "header_image_url": edit_form.header_image_url.data,
+            #     "bio":  edit_form.bio.data
+            # }
+            # user = **form_data; bad can't redefine user
+
             db.session.commit()
             return redirect(f'/users/{user.id}')
         else:
@@ -331,7 +350,7 @@ def homepage():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect("/login")
 
     message_ids = []
     for following in g.user.following:
@@ -356,7 +375,7 @@ def message_like(msg_id):
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-    
+
     user = g.user
     message = Message.query.get(msg_id)
     message_author = message.user
@@ -370,8 +389,15 @@ def message_like(msg_id):
             Likes.query.filter(
                 Likes.user_id == user.id, Likes.message_id == msg_id).delete()
             db.session.commit()
-    return redirect("/")
+    return redirect(request.referrer)
 
+@app.route("/users/<int:user_id>/likes")
+def user_likes(user_id):
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    return render_template("/users/likes.html", messages=g.user.likes)
 
 ##############################################################################
 # Turn off all caching in Flask
