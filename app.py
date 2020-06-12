@@ -93,7 +93,7 @@ def login():
     """Handle user login."""
 
     form = LoginForm()
-
+ 
     if form.validate_on_submit():
         user = User.authenticate(form.username.data,
                                  form.password.data)
