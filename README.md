@@ -1,8 +1,8 @@
-Warbler
+## Warbler
 
 A twitter clone application written in Python using Flask and SQLAlchemy.
 
-Frameworks/Libraries used to build:
+## Frameworks/Libraries used to build:
 Flask
 SQLAlchemy
 PostgreSQL
@@ -11,7 +11,7 @@ Bcrypt
 Jinja
 
 
-Functionality includes:
+## Functionality includes:
 Signup/Login/Logout
 Liking/Disliking posts
 Adding and deleting posts of your own
