@@ -37,4 +37,5 @@ class UserEditForm(FlaskForm):
 
 class AuthenticateForm(FlaskForm):
     """Form for authenticating users."""
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[
+                             DataRequired(), Length(min=6)])

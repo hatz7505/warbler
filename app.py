@@ -94,7 +94,7 @@ def login():
     """Handle user login."""
 
     form = LoginForm()
- 
+
     if form.validate_on_submit():
         user = User.authenticate(form.username.data,
                                  form.password.data)
@@ -258,14 +258,6 @@ def profile_post():
             user.image_url = edit_form.image_url.data
             user.header_image_url = edit_form.header_image_url.data
             user.bio = edit_form.bio.data
-            # form_data = { 
-            #     "username": edit_form.username.data,
-            #     "email": edit_form.email.data,
-            #     "image_url": edit_form.image_url.data, 
-            #     "header_image_url": edit_form.header_image_url.data,
-            #     "bio":  edit_form.bio.data
-            # }
-            # user = **form_data; bad can't redefine user
 
             db.session.commit()
             return redirect(f'/users/{user.id}')
@@ -394,6 +386,7 @@ def message_like(msg_id):
             db.session.commit()
     return redirect(request.referrer)
 
+
 @app.route("/users/<int:user_id>/likes")
 def user_likes(user_id):
 
@@ -408,6 +401,7 @@ def user_likes(user_id):
 #   handled elsewhere)
 #
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
+
 
 @app.after_request
 def add_header(req):

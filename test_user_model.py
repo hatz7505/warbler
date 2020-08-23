@@ -1,14 +1,12 @@
 """User model tests."""
 
+from app import app
 import os
 from unittest import TestCase
 
 from models import db, User, Message, Follows
-from flask import session
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
-
-from app import app
 
 
 db.create_all()
@@ -44,14 +42,15 @@ class UserModelTestCase(TestCase):
 
     def test_user_repr(self):
         u = User(
-                    email="test@test.com",
-                    username="testuser",
-                    password="HASHED_PASSWORD"
-                )
+            email="test@test.com",
+            username="testuser",
+            password="HASHED_PASSWORD"
+        )
         db.session.add(u)
         db.session.commit()
 
-        self.assertEqual(u.__repr__(), f'<User #{u.id}: {u.username}, {u.email}>')
+        self.assertEqual(
+            u.__repr__(), f'<User #{u.id}: {u.username}, {u.email}>')
 
     def test_user_following(self):
         """ positive test case for user 1 following user 2 """
